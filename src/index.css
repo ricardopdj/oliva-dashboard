@@ -1,0 +1,103 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.oliva-display {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: lowercase;
+}
+
+.oliva-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #E7E1D8;
+  background: #fff;
+  transition: all 0.15s;
+  margin-bottom: 8px;
+}
+
+.oliva-pill:hover {
+  border-color: #A98D78;
+}
+
+.oliva-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid #E7E1D8;
+  font-size: 14px;
+  background: #FCFBF8;
+  font-family: inherit;
+}
+
+.oliva-btn-primary {
+  background: #0D0D0D;
+  color: #fff;
+  border: 1px solid #0D0D0D;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oliva-btn-secondary {
+  background: #fff;
+  color: #0D0D0D;
+  border: 1px solid #0D0D0D;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oliva-badge {
+  display: inline-block;
+  background: #C7AC99;
+  color: #0D0D0D;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 760px) {
+  .oliva-sidebar {
+    display: none !important;
+  }
+  .oliva-mobile-bar {
+    display: flex !important;
+  }
+}
