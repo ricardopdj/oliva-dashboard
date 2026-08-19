@@ -1,5 +1,5 @@
 import {
-  Building2, CheckCircle2, Circle, Copy, FileText, Link2, ListChecks, Play, Quote, Send, Sparkles, Upload, Users,
+  AlertCircle, Building2, CheckCircle2, Circle, Copy, FileText, Link2, ListChecks, Mail, Play, Quote, Send, Sparkles, Upload, Users,
   type LucideIcon,
 } from "lucide-react";
 import { cardStyle, TOKENS } from "../../styles/tokens";
@@ -20,8 +20,10 @@ export function ResumoStep() {
   const {
     progress, welcome, cadastro, respLegal, respFinanceiro, empresa, publico, diferenciais, referencias,
     selectedNetworks, materiaisLinks, checklistDone, musicaSugestao, stepIndex, setActiveStep,
-    copySummary, sendWhatsapp,
+    copySummary, sendWhatsapp, audioBlobs, submitStatus, submitError, submitBriefing,
   } = useBriefing();
+
+  const audioTotalMb = Object.values(audioBlobs).reduce((sum, b) => sum + b.size, 0) / (1024 * 1024);
 
   const cards: SummaryCard[] = [
     {
@@ -124,10 +126,30 @@ export function ResumoStep() {
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <button className="oliva-btn-primary" onClick={copySummary}><Copy size={14} /> Copiar resumo</button>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <button className="oliva-btn-primary" onClick={submitBriefing} disabled={submitStatus === "submitting"}
+          style={{ opacity: submitStatus === "submitting" ? 0.6 : 1 }}>
+          <Mail size={14} /> {submitStatus === "submitting" ? "Enviando..." : "Enviar briefing"}
+        </button>
+        <button className="oliva-btn-secondary" onClick={copySummary}><Copy size={14} /> Copiar resumo</button>
         <button className="oliva-btn-secondary" onClick={sendWhatsapp}><Send size={14} /> Enviar por WhatsApp</button>
+        {audioTotalMb > 0.05 && (
+          <span style={{ fontSize: 11.5, color: TOKENS.inkSoft }}>
+            Áudios: {audioTotalMb.toFixed(1)}MB
+          </span>
+        )}
       </div>
+
+      {submitStatus === "success" && (
+        <p style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, fontSize: 13, color: "#2E7D32" }}>
+          <CheckCircle2 size={15} /> Briefing enviado com sucesso.
+        </p>
+      )}
+      {submitStatus === "error" && submitError && (
+        <p style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, fontSize: 13, color: "#C25B4A" }}>
+          <AlertCircle size={15} /> {submitError}
+        </p>
+      )}
     </div>
   );
 }

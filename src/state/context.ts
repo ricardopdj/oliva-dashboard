@@ -31,8 +31,14 @@ export interface BriefingContextValue extends BriefingFormState {
   setChecklistDone: Dispatch<SetStateAction<boolean[]>>;
 
   audio: Record<string, string>;
+  audioBlobs: Record<string, Blob>;
   recordingId: string | null;
   toggleRecord: (qid: string) => void;
+
+  draftStatus: "idle" | "saving" | "saved" | "error";
+  submitStatus: "idle" | "submitting" | "success" | "error";
+  submitError: string | null;
+  submitBriefing: () => void;
 
   resetForm: () => void;
   copySummary: () => void;

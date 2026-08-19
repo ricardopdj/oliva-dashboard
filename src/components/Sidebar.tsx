@@ -1,6 +1,7 @@
 import { TOKENS } from "../styles/tokens";
 import { SECTIONS } from "../data/sections";
 import { useBriefing } from "../state/useBriefing";
+import { DevTools } from "./DevTools";
 
 export function Sidebar() {
   const { activeStep, setActiveStep, setMobileNavOpen, resetForm } = useBriefing();
@@ -32,6 +33,7 @@ export function Sidebar() {
       }}>
         Reiniciar formulário
       </button>
+      <DevTools />
     </div>
   );
 }

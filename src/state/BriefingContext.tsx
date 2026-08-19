@@ -1,5 +1,5 @@
 import {
-  useCallback, useMemo, useState,
+  useCallback, useEffect, useMemo, useState,
   type ReactNode,
 } from "react";
 import { SECTIONS, type SectionId } from "../data/sections";
@@ -7,10 +7,14 @@ import { EMPRESA_Q, PUBLICO_Q, DIFERENCIAIS_Q, REFERENCIAS_Q, NETWORK_Q, NETWORK
 import { CADASTRO_FIELDS, RESP_FIELDS, CONTATO_CAMPOS } from "../data/fields";
 import { CHECKLIST_DEFAULT } from "../data/checklist";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
+import { useDebouncedSave } from "../hooks/useDebouncedSave";
+import { clearAll, loadDraft, saveDraft } from "../lib/db";
 import type {
   BriefingFormState, ContatoData, FieldValues, MaterialLink, NetworkData, WelcomeData,
 } from "./types";
 import { BriefingContext, type BriefingContextValue } from "./context";
+
+const MAX_AUDIO_BYTES = 4 * 1024 * 1024;
 
 const initialState: BriefingFormState = {
   welcome: {},
@@ -52,7 +56,51 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
   const [musicaSugestao, setMusicaSugestao] = useState(initialState.musicaSugestao);
   const [checklistDone, setChecklistDone] = useState<boolean[]>(initialState.checklistDone);
 
-  const { audio, recordingId, toggleRecord, resetAudio } = useAudioRecorder();
+  const { audio, audioBlobs, recordingId, toggleRecord, resetAudio } = useAudioRecorder();
+
+  const [loaded, setLoaded] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const draft = await loadDraft();
+      if (draft) {
+        setWelcome(draft.welcome);
+        setCadastro(draft.cadastro);
+        setEmpresa(draft.empresa);
+        setPublico(draft.publico);
+        setDiferenciais(draft.diferenciais);
+        setReferencias(draft.referencias);
+        setSelectedNetworks(draft.selectedNetworks);
+        setNetworkData(draft.networkData);
+        setShowLinkedinHelp(draft.showLinkedinHelp);
+        setOutrosContatos(draft.outrosContatos);
+        setMateriaisLinks(draft.materiaisLinks);
+        setPontoFocal(draft.pontoFocal);
+        setRespLegal(draft.respLegal);
+        setRespFinanceiro(draft.respFinanceiro);
+        setMusicaSugestao(draft.musicaSugestao);
+        setChecklistDone(draft.checklistDone);
+      }
+      setLoaded(true);
+    })();
+  }, []);
+
+  const { trigger: triggerSaveDraft, status: draftStatus } = useDebouncedSave<BriefingFormState>(saveDraft);
+
+  useEffect(() => {
+    if (!loaded) return;
+    triggerSaveDraft({
+      welcome, cadastro, empresa, publico, diferenciais, referencias, selectedNetworks, networkData,
+      showLinkedinHelp, outrosContatos, materiaisLinks, pontoFocal, respLegal, respFinanceiro,
+      musicaSugestao, checklistDone,
+    });
+  }, [
+    loaded, welcome, cadastro, empresa, publico, diferenciais, referencias, selectedNetworks, networkData,
+    showLinkedinHelp, outrosContatos, materiaisLinks, pontoFocal, respLegal, respFinanceiro,
+    musicaSugestao, checklistDone, triggerSaveDraft,
+  ]);
 
   const toggleNetwork = useCallback((net: string) => {
     setSelectedNetworks((prev) => (prev.includes(net) ? prev.filter((n) => n !== net) : [...prev, net]));
@@ -81,6 +129,9 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
     setChecklistDone(CHECKLIST_DEFAULT.map(() => false));
     resetAudio();
     setActiveStep(0);
+    setSubmitStatus("idle");
+    setSubmitError(null);
+    clearAll();
   }, [resetAudio]);
 
   const totalFields =
@@ -158,6 +209,34 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }, [buildSummary]);
 
+  const submitBriefing = useCallback(async () => {
+    const totalAudioBytes = Object.values(audioBlobs).reduce((sum, b) => sum + b.size, 0);
+    if (totalAudioBytes > MAX_AUDIO_BYTES) {
+      setSubmitStatus("error");
+      setSubmitError(
+        `Os áudios gravados somam ${(totalAudioBytes / (1024 * 1024)).toFixed(1)}MB, o limite é ${(MAX_AUDIO_BYTES / (1024 * 1024)).toFixed(0)}MB. Regrave alguma resposta mais curta antes de enviar.`
+      );
+      return;
+    }
+    setSubmitStatus("submitting");
+    setSubmitError(null);
+    try {
+      const formData = new FormData();
+      formData.set("summary", buildSummary());
+      formData.set("company", welcome.empresa || "");
+      Object.entries(audioBlobs).forEach(([qid, blob]) => {
+        formData.set(`audio_${qid}`, blob, `${qid}.webm`);
+      });
+      const res = await fetch("/api/submit-briefing", { method: "POST", body: formData });
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+      setSubmitStatus("success");
+      await clearAll();
+    } catch {
+      setSubmitStatus("error");
+      setSubmitError("Não foi possível enviar o briefing. Tente novamente em instantes.");
+    }
+  }, [audioBlobs, buildSummary, welcome]);
+
   const stepIndex = useCallback((id: SectionId) => SECTIONS.findIndex((s) => s.id === id), []);
   const currentId = SECTIONS[activeStep].id;
 
@@ -170,7 +249,8 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
     outrosContatos, setOutrosContatos, materiaisLinks, setMateriaisLinks,
     pontoFocal, setPontoFocal, respLegal, setRespLegal, respFinanceiro, setRespFinanceiro,
     musicaSugestao, setMusicaSugestao, checklistDone, setChecklistDone,
-    audio, recordingId, toggleRecord,
+    audio, audioBlobs, recordingId, toggleRecord,
+    draftStatus, submitStatus, submitError, submitBriefing,
     resetForm, copySummary, sendWhatsapp,
   }), [
     activeStep, mobileNavOpen, currentId, stepIndex, progress,
@@ -178,7 +258,9 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
     selectedNetworks, toggleNetwork, networkData, setNetField,
     showLinkedinHelp, outrosContatos, materiaisLinks,
     pontoFocal, respLegal, respFinanceiro, musicaSugestao, checklistDone,
-    audio, recordingId, toggleRecord, resetForm, copySummary, sendWhatsapp,
+    audio, audioBlobs, recordingId, toggleRecord,
+    draftStatus, submitStatus, submitError, submitBriefing,
+    resetForm, copySummary, sendWhatsapp,
   ]);
 
   return <BriefingContext.Provider value={value}>{children}</BriefingContext.Provider>;
