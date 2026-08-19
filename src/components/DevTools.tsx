@@ -11,7 +11,9 @@ const devLinkStyle: CSSProperties = {
 export function DevTools() {
   const b = useBriefing();
 
-  if (!import.meta.env.DEV) return null;
+  const showDevTools =
+    import.meta.env.DEV || import.meta.env.VITE_SHOW_DEVTOOLS === "true";
+  if (!showDevTools) return null;
 
   const fillTestData = () => {
     b.setWelcome(TEST_DATA.welcome);
