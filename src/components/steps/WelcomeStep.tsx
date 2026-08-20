@@ -1,9 +1,8 @@
 import { TOKENS } from "../../styles/tokens";
 import { useBriefing } from "../../state/useBriefing";
-import { PlaylistCard } from "../PlaylistCard";
 import olivaMark from "../../assets/oliva-mark.png";
 
-export function WelcomeStep() {
+export function WelcomeStep({ onPlayerSlotChange }: { onPlayerSlotChange: (el: HTMLDivElement | null) => void }) {
   const { welcome, setWelcome, musicaSugestao, setMusicaSugestao, setActiveStep } = useBriefing();
 
   return (
@@ -18,7 +17,7 @@ export function WelcomeStep() {
         Deixa essa playlist tocando e responde no seu ritmo.
       </p>
 
-      <PlaylistCard />
+      <div ref={onPlayerSlotChange} style={{ marginTop: 22, borderRadius: 12, height: 352 }} />
 
       <div style={{ marginTop: 18, position: "relative" }}>
         <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: TOKENS.mocha, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>

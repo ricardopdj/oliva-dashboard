@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { TOKENS } from "./styles/tokens";
 import { BriefingProvider } from "./state/BriefingContext";
 import { useBriefing } from "./state/useBriefing";
 import { TopBar } from "./components/TopBar";
 import { Sidebar } from "./components/Sidebar";
 import { StepNav } from "./components/StepNav";
+import { PersistentPlayer } from "./components/PersistentPlayer";
 import { WelcomeStep } from "./components/steps/WelcomeStep";
 import { CadastroStep } from "./components/steps/CadastroStep";
 import { EmpresaStep } from "./components/steps/EmpresaStep";
@@ -17,6 +19,7 @@ import { ResumoStep } from "./components/steps/ResumoStep";
 
 function BriefingLayout() {
   const { currentId } = useBriefing();
+  const [welcomeSlotEl, setWelcomeSlotEl] = useState<HTMLDivElement | null>(null);
 
   return (
     <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", background: TOKENS.bgPage, minHeight: "100vh", color: TOKENS.ink }}>
@@ -27,7 +30,7 @@ function BriefingLayout() {
 
         <div className="oliva-content" style={{ flex: 1, display: "flex", justifyContent: "center", minWidth: 0 }}>
           <div style={{ width: "100%", maxWidth: 680, minWidth: 0 }}>
-            {currentId === "boasvindas" && <WelcomeStep />}
+            {currentId === "boasvindas" && <WelcomeStep onPlayerSlotChange={setWelcomeSlotEl} />}
             {currentId === "cadastro" && <CadastroStep />}
             {currentId === "empresa" && <EmpresaStep />}
             {currentId === "publico" && <PublicoStep />}
@@ -42,6 +45,8 @@ function BriefingLayout() {
           </div>
         </div>
       </div>
+
+      <PersistentPlayer anchorEl={welcomeSlotEl} />
     </div>
   );
 }
