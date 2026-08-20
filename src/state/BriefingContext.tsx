@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useMemo, useState,
   type ReactNode,
 } from "react";
-import { upload } from "@vercel/blob/client";
+import { uploadPresigned } from "@vercel/blob/client";
 import { SECTIONS, type SectionId } from "../data/sections";
 import { EMPRESA_Q, PUBLICO_Q, DIFERENCIAIS_Q, REFERENCIAS_Q, NETWORK_Q, NETWORK_Q_NO_ACESSO } from "../data/questions";
 import { CADASTRO_FIELDS, RESP_FIELDS, CONTATO_CAMPOS } from "../data/fields";
@@ -224,13 +224,14 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
     try {
       const audioLinks = await Promise.all(
         Object.entries(audioBlobs).map(async ([qid, blob]) => {
-          const result = await upload(`briefing-audio/${qid}-${Date.now()}.webm`, blob, {
-            access: "public",
+          const pathname = `briefing-audio/${qid}-${crypto.randomUUID()}.webm`;
+          await uploadPresigned(pathname, blob, {
+            access: "private",
             handleUploadUrl: "/api/blob-upload",
             contentType: blob.type || "audio/webm",
             multipart: true,
           });
-          return { qid, label: audioLabel(qid), url: result.url };
+          return { qid, label: audioLabel(qid), pathname };
         })
       );
 

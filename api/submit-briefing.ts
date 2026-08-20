@@ -1,9 +1,10 @@
 import { Resend } from "resend";
+import { issueSignedToken, presignUrl } from "@vercel/blob";
 
-interface AudioLink {
+interface AudioEntry {
   qid: string;
   label: string;
-  url: string;
+  pathname: string;
 }
 
 interface SubmitBody {
@@ -11,6 +12,8 @@ interface SubmitBody {
   company?: unknown;
   audioLinks?: unknown;
 }
+
+const GET_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default {
   async fetch(request: Request) {
@@ -39,25 +42,39 @@ export default {
     }
     const companyName = typeof body.company === "string" && body.company.trim() ? body.company.trim() : "empresa sem nome";
 
-    const audioLinks: AudioLink[] = Array.isArray(body.audioLinks)
+    const audioEntries: AudioEntry[] = Array.isArray(body.audioLinks)
       ? body.audioLinks.filter(
-          (a): a is AudioLink =>
+          (a): a is AudioEntry =>
             !!a && typeof a === "object" &&
-            typeof (a as AudioLink).url === "string" &&
-            typeof (a as AudioLink).label === "string"
+            typeof (a as AudioEntry).pathname === "string" &&
+            typeof (a as AudioEntry).label === "string"
         )
       : [];
 
-    const text = audioLinks.length
-      ? `${summary}\n\n== ÁUDIOS GRAVADOS ==\n${audioLinks.map((a) => `${a.label}: ${a.url}`).join("\n")}`
-      : summary;
+    let audioSection = "";
+    if (audioEntries.length) {
+      const validUntil = Date.now() + GET_LINK_TTL_MS;
+      const token = await issueSignedToken({ operations: ["get"], validUntil });
+      const links = await Promise.all(
+        audioEntries.map(async (a) => {
+          const { presignedUrl } = await presignUrl(token, {
+            operation: "get",
+            pathname: a.pathname,
+            access: "private",
+            validUntil,
+          });
+          return `${a.label}: ${presignedUrl}`;
+        })
+      );
+      audioSection = `\n\n== ÁUDIOS GRAVADOS (links válidos por 7 dias) ==\n${links.join("\n")}`;
+    }
 
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
       from,
       to,
       subject: `Novo briefing recebido — ${companyName}`,
-      text,
+      text: `${summary}${audioSection}`,
     });
 
     if (error) {
