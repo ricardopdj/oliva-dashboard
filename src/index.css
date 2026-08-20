@@ -121,6 +121,10 @@ button:disabled {
     display: flex !important;
   }
 
+  .oliva-content {
+    padding-bottom: 120px;
+  }
+
   .oliva-sidebar.oliva-sidebar-mobile-open {
     display: flex !important;
     flex-direction: column;
@@ -181,7 +185,7 @@ button:disabled {
     gap: 8px;
   }
   .oliva-content {
-    padding: 20px 14px;
+    padding: 20px 14px 120px;
   }
   .oliva-card {
     padding: 22px 18px;
