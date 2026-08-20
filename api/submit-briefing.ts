@@ -1,6 +1,16 @@
 import { Resend } from "resend";
 
-const MAX_TOTAL_BYTES = 4.5 * 1024 * 1024;
+interface AudioLink {
+  qid: string;
+  label: string;
+  url: string;
+}
+
+interface SubmitBody {
+  summary?: unknown;
+  company?: unknown;
+  audioLinks?: unknown;
+}
 
 export default {
   async fetch(request: Request) {
@@ -16,44 +26,38 @@ export default {
       return new Response(JSON.stringify({ ok: false, error: "Server not configured" }), { status: 500 });
     }
 
-    let formData: FormData;
+    let body: SubmitBody;
     try {
-      formData = await request.formData();
+      body = (await request.json()) as SubmitBody;
     } catch {
-      return new Response(JSON.stringify({ ok: false, error: "Invalid form data" }), { status: 400 });
+      return new Response(JSON.stringify({ ok: false, error: "Invalid request body" }), { status: 400 });
     }
 
-    const summary = formData.get("summary");
+    const summary = body.summary;
     if (typeof summary !== "string" || !summary.trim()) {
       return new Response(JSON.stringify({ ok: false, error: "Missing summary" }), { status: 400 });
     }
-    const company = formData.get("company");
-    const companyName = typeof company === "string" && company.trim() ? company.trim() : "empresa sem nome";
+    const companyName = typeof body.company === "string" && body.company.trim() ? body.company.trim() : "empresa sem nome";
 
-    const audioFiles: File[] = [];
-    for (const [key, value] of formData.entries()) {
-      if (key.startsWith("audio_") && value instanceof File) audioFiles.push(value);
-    }
+    const audioLinks: AudioLink[] = Array.isArray(body.audioLinks)
+      ? body.audioLinks.filter(
+          (a): a is AudioLink =>
+            !!a && typeof a === "object" &&
+            typeof (a as AudioLink).url === "string" &&
+            typeof (a as AudioLink).label === "string"
+        )
+      : [];
 
-    const totalBytes = audioFiles.reduce((sum, f) => sum + f.size, 0);
-    if (totalBytes > MAX_TOTAL_BYTES) {
-      return new Response(JSON.stringify({ ok: false, error: "Payload too large" }), { status: 413 });
-    }
-
-    const attachments = await Promise.all(
-      audioFiles.map(async (file) => ({
-        filename: file.name || "audio.webm",
-        content: Buffer.from(await file.arrayBuffer()),
-      }))
-    );
+    const text = audioLinks.length
+      ? `${summary}\n\n== ÁUDIOS GRAVADOS ==\n${audioLinks.map((a) => `${a.label}: ${a.url}`).join("\n")}`
+      : summary;
 
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
       from,
       to,
       subject: `Novo briefing recebido — ${companyName}`,
-      text: summary,
-      attachments,
+      text,
     });
 
     if (error) {

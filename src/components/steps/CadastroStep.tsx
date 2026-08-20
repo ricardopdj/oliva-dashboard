@@ -10,7 +10,7 @@ export function CadastroStep() {
   } = useBriefing();
 
   return (
-    <div style={cardStyle}>
+    <div className="oliva-card" style={cardStyle}>
       <span className="oliva-badge">01</span>
       <h2 className="oliva-display" style={{ fontSize: 26, color: TOKENS.black, margin: "0 0 4px" }}>dados cadastrais</h2>
       <p style={{ fontSize: 13, color: TOKENS.inkSoft, marginBottom: 18 }}>Dados administrativos, para contrato e nota fiscal.</p>

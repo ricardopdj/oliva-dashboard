@@ -42,7 +42,7 @@ export function TextField({ label, value, onChange, audioUrl, onRecordToggle, re
             {recording ? <Square size={12} /> : <Mic size={12} />}
             {recording ? "Parar gravação" : "Responder com áudio"}
           </button>
-          {recording && <span style={{ fontSize: 11, color: TOKENS.inkSoft }}>máx. 2 min</span>}
+          {recording && <span style={{ fontSize: 11, color: TOKENS.inkSoft }}>gravando…</span>}
           {audioUrl && <audio controls src={audioUrl} style={{ height: 30 }} />}
         </div>
       )}

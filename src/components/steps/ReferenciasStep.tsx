@@ -7,7 +7,7 @@ export function ReferenciasStep() {
   const { referencias, setReferencias, audio, recordingId, toggleRecord } = useBriefing();
 
   return (
-    <div style={cardStyle}>
+    <div className="oliva-card" style={cardStyle}>
       <span className="oliva-badge">05</span>
       <h2 className="oliva-display" style={{ fontSize: 26, color: TOKENS.black, margin: "0 0 20px" }}>referências</h2>
       {REFERENCIAS_Q.map((q) => (

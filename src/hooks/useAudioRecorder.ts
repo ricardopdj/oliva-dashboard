@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { deleteAudioBlob, loadAllAudioBlobs, saveAudioBlob } from "../lib/db";
 
-const MAX_RECORDING_MS = 120_000;
+// Not a real limit for the user — just a safety net in case someone forgets a recording running.
+const SAFETY_MAX_RECORDING_MS = 20 * 60_000;
 const AUDIO_BITS_PER_SECOND = 32_000;
 
 export function useAudioRecorder() {
@@ -50,7 +51,7 @@ export function useAudioRecorder() {
       maxDurationTimerRef.current = setTimeout(() => {
         rec.stop();
         setRecordingId(null);
-      }, MAX_RECORDING_MS);
+      }, SAFETY_MAX_RECORDING_MS);
     } catch {
       alert("Não foi possível acessar o microfone. Verifique a permissão do navegador.");
     }
@@ -76,5 +77,5 @@ export function useAudioRecorder() {
     deleteAudioBlob(qid);
   }, []);
 
-  return { audio, audioBlobs, recordingId, toggleRecord, resetAudio, removeAudio, maxRecordingMs: MAX_RECORDING_MS };
+  return { audio, audioBlobs, recordingId, toggleRecord, resetAudio, removeAudio };
 }

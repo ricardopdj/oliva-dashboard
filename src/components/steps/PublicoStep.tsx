@@ -7,7 +7,7 @@ export function PublicoStep() {
   const { publico, setPublico, audio, recordingId, toggleRecord } = useBriefing();
 
   return (
-    <div style={cardStyle}>
+    <div className="oliva-card" style={cardStyle}>
       <span className="oliva-badge">03</span>
       <h2 className="oliva-display" style={{ fontSize: 26, color: TOKENS.black, margin: "0 0 20px" }}>sobre o público</h2>
       {PUBLICO_Q.map((q) => (

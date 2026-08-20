@@ -71,7 +71,7 @@ export function ResumoStep() {
   ];
 
   return (
-    <div style={cardStyle}>
+    <div className="oliva-card" style={cardStyle}>
       <span className="oliva-badge">09</span>
       <h2 className="oliva-display" style={{ fontSize: 26, color: TOKENS.black, margin: "0 0 4px" }}>resumo final</h2>
       <p style={{ fontSize: 13, color: TOKENS.inkSoft, marginBottom: 22 }}>

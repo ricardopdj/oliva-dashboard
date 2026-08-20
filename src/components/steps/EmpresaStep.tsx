@@ -7,7 +7,7 @@ export function EmpresaStep() {
   const { empresa, setEmpresa, audio, recordingId, toggleRecord } = useBriefing();
 
   return (
-    <div style={cardStyle}>
+    <div className="oliva-card" style={cardStyle}>
       <span className="oliva-badge">02</span>
       <h2 className="oliva-display" style={{ fontSize: 26, color: TOKENS.black, margin: "0 0 20px" }}>sobre a empresa</h2>
       {EMPRESA_Q.map((q) => (

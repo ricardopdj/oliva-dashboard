@@ -93,11 +93,112 @@ button:disabled {
   margin-bottom: 14px;
 }
 
+.oliva-sidebar-backdrop {
+  display: none;
+}
+
+.oliva-content {
+  padding: 30px 24px;
+}
+
+.oliva-card {
+  padding: 32px 34px;
+}
+
+.oliva-welcome-card {
+  padding: 40px 36px 36px;
+}
+
+.oliva-welcome-title {
+  font-size: 36px;
+}
+
 @media (max-width: 760px) {
   .oliva-sidebar {
     display: none !important;
   }
   .oliva-mobile-bar {
     display: flex !important;
+  }
+
+  .oliva-sidebar.oliva-sidebar-mobile-open {
+    display: flex !important;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(78vw, 280px) !important;
+    max-width: 280px;
+    z-index: 1000;
+    background: #FAF9F6;
+    box-shadow: 2px 0 24px rgba(13, 13, 13, 0.25);
+    overflow-y: auto;
+    animation: oliva-sidebar-in 0.18s ease-out;
+  }
+
+  .oliva-sidebar-backdrop.oliva-sidebar-backdrop-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 13, 13, 0.45);
+    z-index: 999;
+  }
+}
+
+@keyframes oliva-sidebar-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.oliva-topbar-brand {
+  min-width: 0;
+}
+
+.oliva-topbar-subtitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.oliva-progress-track {
+  width: 120px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .oliva-topbar {
+    padding: 14px 16px !important;
+    gap: 8px;
+  }
+  .oliva-content {
+    padding: 20px 14px;
+  }
+  .oliva-card {
+    padding: 22px 18px;
+  }
+  .oliva-welcome-card {
+    padding: 26px 20px 24px;
+  }
+  .oliva-welcome-title {
+    font-size: 27px;
+  }
+  .oliva-progress-track {
+    width: 56px;
+  }
+}
+
+@media (max-width: 420px) {
+  .oliva-topbar-subtitle {
+    display: none;
   }
 }

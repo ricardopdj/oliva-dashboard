@@ -2,6 +2,7 @@ import {
   useCallback, useEffect, useMemo, useState,
   type ReactNode,
 } from "react";
+import { upload } from "@vercel/blob/client";
 import { SECTIONS, type SectionId } from "../data/sections";
 import { EMPRESA_Q, PUBLICO_Q, DIFERENCIAIS_Q, REFERENCIAS_Q, NETWORK_Q, NETWORK_Q_NO_ACESSO } from "../data/questions";
 import { CADASTRO_FIELDS, RESP_FIELDS, CONTATO_CAMPOS } from "../data/fields";
@@ -13,8 +14,6 @@ import type {
   BriefingFormState, ContatoData, FieldValues, MaterialLink, NetworkData, WelcomeData,
 } from "./types";
 import { BriefingContext, type BriefingContextValue } from "./context";
-
-const MAX_AUDIO_BYTES = 4 * 1024 * 1024;
 
 const initialState: BriefingFormState = {
   welcome: {},
@@ -209,25 +208,37 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }, [buildSummary]);
 
-  const submitBriefing = useCallback(async () => {
-    const totalAudioBytes = Object.values(audioBlobs).reduce((sum, b) => sum + b.size, 0);
-    if (totalAudioBytes > MAX_AUDIO_BYTES) {
-      setSubmitStatus("error");
-      setSubmitError(
-        `Os áudios gravados somam ${(totalAudioBytes / (1024 * 1024)).toFixed(1)}MB, o limite é ${(MAX_AUDIO_BYTES / (1024 * 1024)).toFixed(0)}MB. Regrave alguma resposta mais curta antes de enviar.`
-      );
-      return;
+  const audioLabel = useCallback((qid: string): string => {
+    const direct = [...EMPRESA_Q, ...PUBLICO_Q, ...DIFERENCIAIS_Q, ...REFERENCIAS_Q].find((q) => q.id === qid);
+    if (direct) return direct.label;
+    for (const net of selectedNetworks) {
+      const q = NETWORK_Q.find((q) => `${net}-${q.id}` === qid);
+      if (q) return `${net} — ${q.label}`;
     }
+    return qid;
+  }, [selectedNetworks]);
+
+  const submitBriefing = useCallback(async () => {
     setSubmitStatus("submitting");
     setSubmitError(null);
     try {
-      const formData = new FormData();
-      formData.set("summary", buildSummary());
-      formData.set("company", welcome.empresa || "");
-      Object.entries(audioBlobs).forEach(([qid, blob]) => {
-        formData.set(`audio_${qid}`, blob, `${qid}.webm`);
+      const audioLinks = await Promise.all(
+        Object.entries(audioBlobs).map(async ([qid, blob]) => {
+          const result = await upload(`briefing-audio/${qid}-${Date.now()}.webm`, blob, {
+            access: "public",
+            handleUploadUrl: "/api/blob-upload",
+            contentType: blob.type || "audio/webm",
+            multipart: true,
+          });
+          return { qid, label: audioLabel(qid), url: result.url };
+        })
+      );
+
+      const res = await fetch("/api/submit-briefing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summary: buildSummary(), company: welcome.empresa || "", audioLinks }),
       });
-      const res = await fetch("/api/submit-briefing", { method: "POST", body: formData });
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       setSubmitStatus("success");
       await clearAll();
@@ -235,7 +246,7 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
       setSubmitStatus("error");
       setSubmitError("Não foi possível enviar o briefing. Tente novamente em instantes.");
     }
-  }, [audioBlobs, buildSummary, welcome]);
+  }, [audioBlobs, audioLabel, buildSummary, welcome]);
 
   const stepIndex = useCallback((id: SectionId) => SECTIONS.findIndex((s) => s.id === id), []);
   const currentId = SECTIONS[activeStep].id;

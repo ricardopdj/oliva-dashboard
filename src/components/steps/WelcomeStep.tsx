@@ -7,10 +7,10 @@ export function WelcomeStep() {
   const { welcome, setWelcome, musicaSugestao, setMusicaSugestao, setActiveStep } = useBriefing();
 
   return (
-    <div style={{ background: TOKENS.black, borderRadius: 16, padding: "40px 36px 36px", maxWidth: 680, position: "relative", overflow: "hidden" }}>
+    <div className="oliva-welcome-card" style={{ background: TOKENS.black, borderRadius: 16, maxWidth: 680, position: "relative", overflow: "hidden" }}>
       <img src={olivaMark} alt="" style={{ position: "absolute", right: -20, bottom: -14, width: 560, opacity: 0.16, pointerEvents: "none" }} />
       <span style={{ color: TOKENS.mocha, fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 700 }}>trilha para a experiência</span>
-      <h1 className="oliva-display" style={{ fontSize: 36, margin: "10px 0 16px", color: "#fff", lineHeight: 1.05 }}>
+      <h1 className="oliva-display oliva-welcome-title" style={{ margin: "10px 0 16px", color: "#fff", lineHeight: 1.05 }}>
         aperte play<br />e se conecte
       </h1>
       <p style={{ color: "#D8D2C8", fontSize: 14, lineHeight: 1.7, maxWidth: 480, position: "relative" }}>

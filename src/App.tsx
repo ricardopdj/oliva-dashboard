@@ -25,8 +25,8 @@ function BriefingLayout() {
       <div style={{ display: "flex" }}>
         <Sidebar />
 
-        <div style={{ flex: 1, padding: "30px 24px", display: "flex", justifyContent: "center" }}>
-          <div style={{ width: "100%", maxWidth: 680 }}>
+        <div className="oliva-content" style={{ flex: 1, display: "flex", justifyContent: "center", minWidth: 0 }}>
+          <div style={{ width: "100%", maxWidth: 680, minWidth: 0 }}>
             {currentId === "boasvindas" && <WelcomeStep />}
             {currentId === "cadastro" && <CadastroStep />}
             {currentId === "empresa" && <EmpresaStep />}

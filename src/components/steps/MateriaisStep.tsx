@@ -6,7 +6,7 @@ export function MateriaisStep() {
   const { materiaisLinks, setMateriaisLinks } = useBriefing();
 
   return (
-    <div style={cardStyle}>
+    <div className="oliva-card" style={cardStyle}>
       <span className="oliva-badge">07</span>
       <h2 className="oliva-display" style={{ fontSize: 26, color: TOKENS.black, margin: "0 0 12px" }}>materiais e links</h2>
       <p style={{ fontSize: 13.5, color: TOKENS.inkSoft, marginBottom: 6, lineHeight: 1.6 }}>

@@ -15,5 +15,5 @@ export const TOKENS = {
 
 export const cardStyle: CSSProperties = {
   background: TOKENS.bgCard, borderRadius: 20, border: `1px solid ${TOKENS.hair}`,
-  padding: "32px 34px", maxWidth: 680,
+  maxWidth: 680,
 };
