@@ -33,7 +33,7 @@ export interface BriefingContextValue extends BriefingFormState {
   audio: Record<string, string>;
   audioBlobs: Record<string, Blob>;
   recordingId: string | null;
-  toggleRecord: (qid: string) => void;
+  toggleRecord: (qid: string, currentValue?: string, onTranscriptChange?: (text: string) => void) => void;
 
   draftStatus: "idle" | "saving" | "saved" | "error";
   submitStatus: "idle" | "submitting" | "success" | "error";

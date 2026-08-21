@@ -12,7 +12,8 @@ export function ReferenciasStep() {
       <h2 className="oliva-display" style={{ fontSize: 26, color: TOKENS.black, margin: "0 0 20px" }}>referências</h2>
       {REFERENCIAS_Q.map((q) => (
         <TextField key={q.id} label={q.label} value={referencias[q.id]} onChange={(v) => setReferencias({ ...referencias, [q.id]: v })}
-          audioUrl={audio[q.id]} recording={recordingId === q.id} onRecordToggle={() => toggleRecord(q.id)} />
+          audioUrl={audio[q.id]} recording={recordingId === q.id}
+          onRecordToggle={() => toggleRecord(q.id, referencias[q.id] || "", (text) => setReferencias((prev) => ({ ...prev, [q.id]: text })))} />
       ))}
     </div>
   );

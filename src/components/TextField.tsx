@@ -1,5 +1,6 @@
 import { Mic, Square } from "lucide-react";
 import { TOKENS } from "../styles/tokens";
+import { SPEECH_RECOGNITION_SUPPORTED } from "../lib/speechRecognition";
 
 interface TextFieldProps {
   label: string;
@@ -21,7 +22,9 @@ export function TextField({ label, value, onChange, audioUrl, onRecordToggle, re
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
-        placeholder="Escreva à vontade, ou grave um áudio ao lado."
+        placeholder={SPEECH_RECOGNITION_SUPPORTED
+          ? "Escreva à vontade, ou dite em voz alta ao lado."
+          : "Escreva à vontade, ou grave um áudio ao lado."}
         style={{
           width: "100%", padding: "10px 12px", borderRadius: 10,
           border: `1px solid ${TOKENS.hair}`, fontSize: 14, color: TOKENS.ink,
@@ -40,9 +43,15 @@ export function TextField({ label, value, onChange, audioUrl, onRecordToggle, re
             }}
           >
             {recording ? <Square size={12} /> : <Mic size={12} />}
-            {recording ? "Parar gravação" : "Responder com áudio"}
+            {recording
+              ? "Parar gravação"
+              : SPEECH_RECOGNITION_SUPPORTED ? "Responder por voz" : "Responder com áudio"}
           </button>
-          {recording && <span style={{ fontSize: 11, color: TOKENS.inkSoft }}>gravando…</span>}
+          {recording && (
+            <span style={{ fontSize: 11, color: TOKENS.inkSoft }}>
+              {SPEECH_RECOGNITION_SUPPORTED ? "transcrevendo…" : "gravando…"}
+            </span>
+          )}
           {audioUrl && <audio controls src={audioUrl} style={{ height: 30 }} />}
         </div>
       )}

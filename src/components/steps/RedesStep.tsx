@@ -77,7 +77,13 @@ export function RedesStep() {
               onChange={(v) => setNetField(net, q.id, v)}
               audioUrl={q.id !== "acesso" ? audio[`${net}-${q.id}`] : undefined}
               recording={q.id !== "acesso" ? recordingId === `${net}-${q.id}` : undefined}
-              onRecordToggle={q.id !== "acesso" ? () => toggleRecord(`${net}-${q.id}`) : undefined} />
+              onRecordToggle={q.id !== "acesso"
+                ? () => toggleRecord(
+                    `${net}-${q.id}`,
+                    (networkData[net]?.[q.id] as string) || "",
+                    (text) => setNetField(net, q.id, text),
+                  )
+                : undefined} />
           ))}
         </div>
       ))}

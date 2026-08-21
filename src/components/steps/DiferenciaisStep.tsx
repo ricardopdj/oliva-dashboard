@@ -13,7 +13,8 @@ export function DiferenciaisStep() {
       <p style={{ fontSize: 13, color: TOKENS.inkSoft, marginBottom: 18 }}>Modo fofoca, sem vergonha.</p>
       {DIFERENCIAIS_Q.map((q) => (
         <TextField key={q.id} label={q.label} value={diferenciais[q.id]} onChange={(v) => setDiferenciais({ ...diferenciais, [q.id]: v })}
-          audioUrl={audio[q.id]} recording={recordingId === q.id} onRecordToggle={() => toggleRecord(q.id)} />
+          audioUrl={audio[q.id]} recording={recordingId === q.id}
+          onRecordToggle={() => toggleRecord(q.id, diferenciais[q.id] || "", (text) => setDiferenciais((prev) => ({ ...prev, [q.id]: text })))} />
       ))}
     </div>
   );

@@ -8,6 +8,8 @@ import { EMPRESA_Q, PUBLICO_Q, DIFERENCIAIS_Q, REFERENCIAS_Q, NETWORK_Q, NETWORK
 import { CADASTRO_FIELDS, RESP_FIELDS, CONTATO_CAMPOS } from "../data/fields";
 import { CHECKLIST_DEFAULT } from "../data/checklist";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
+import { useSpeechToText } from "../hooks/useSpeechToText";
+import { SPEECH_RECOGNITION_SUPPORTED } from "../lib/speechRecognition";
 import { useDebouncedSave } from "../hooks/useDebouncedSave";
 import { clearAll, loadDraft, saveDraft } from "../lib/db";
 import type {
@@ -55,7 +57,23 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
   const [musicaSugestao, setMusicaSugestao] = useState(initialState.musicaSugestao);
   const [checklistDone, setChecklistDone] = useState<boolean[]>(initialState.checklistDone);
 
-  const { audio, audioBlobs, recordingId, toggleRecord, resetAudio } = useAudioRecorder();
+  const audioRecorder = useAudioRecorder();
+  const speechToText = useSpeechToText();
+  const toggleAudioRecord = audioRecorder.toggleRecord;
+  const toggleSpeechRecord = speechToText.toggleRecord;
+  const { audio, audioBlobs, recordingId, resetAudio } =
+    SPEECH_RECOGNITION_SUPPORTED ? speechToText : audioRecorder;
+
+  const toggleRecord = useCallback(
+    (qid: string, currentValue: string = "", onTranscriptChange: (text: string) => void = () => {}) => {
+      if (SPEECH_RECOGNITION_SUPPORTED) {
+        toggleSpeechRecord(qid, currentValue, onTranscriptChange);
+      } else {
+        toggleAudioRecord(qid);
+      }
+    },
+    [toggleSpeechRecord, toggleAudioRecord],
+  );
 
   const [loaded, setLoaded] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");

@@ -12,7 +12,8 @@ export function EmpresaStep() {
       <h2 className="oliva-display" style={{ fontSize: 26, color: TOKENS.black, margin: "0 0 20px" }}>sobre a empresa</h2>
       {EMPRESA_Q.map((q) => (
         <TextField key={q.id} label={q.label} value={empresa[q.id]} onChange={(v) => setEmpresa({ ...empresa, [q.id]: v })}
-          audioUrl={audio[q.id]} recording={recordingId === q.id} onRecordToggle={() => toggleRecord(q.id)} />
+          audioUrl={audio[q.id]} recording={recordingId === q.id}
+          onRecordToggle={() => toggleRecord(q.id, empresa[q.id] || "", (text) => setEmpresa((prev) => ({ ...prev, [q.id]: text })))} />
       ))}
     </div>
   );
