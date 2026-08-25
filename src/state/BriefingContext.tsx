@@ -222,9 +222,29 @@ export function BriefingProvider({ children }: { children: ReactNode }) {
   }, [buildSummary]);
 
   const sendWhatsapp = useCallback(() => {
-    const text = buildSummary().slice(0, 3000);
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  }, [buildSummary]);
+    const full = buildSummary();
+    const url = `https://wa.me/?text=${encodeURIComponent(full)}`;
+    // WhatsApp messages can be ~65k chars; wa.me/?text= is limited by URL length.
+    if (url.length <= 8000) {
+      window.open(url, "_blank");
+      return;
+    }
+    const hint = [
+      `Briefing: ${welcome.empresa || "empresa"}`,
+      "",
+      "O resumo completo não cabe no link do WhatsApp.",
+      "Cole o texto copiado neste campo (Ctrl+V / Cmd+V) e envie.",
+    ].join("\n");
+    void navigator.clipboard.writeText(full).then(
+      () => {
+        window.open(`https://wa.me/?text=${encodeURIComponent(hint)}`, "_blank");
+        alert("O resumo é grande demais para o link do WhatsApp. Copiamos o conteúdo completo — cole no WhatsApp para enviar tudo.");
+      },
+      () => {
+        alert("O resumo é grande demais para o link do WhatsApp. Use “Copiar resumo” e cole no WhatsApp.");
+      },
+    );
+  }, [buildSummary, welcome.empresa]);
 
   const audioLabel = useCallback((qid: string): string => {
     const direct = [...EMPRESA_Q, ...PUBLICO_Q, ...DIFERENCIAIS_Q, ...REFERENCIAS_Q].find((q) => q.id === qid);

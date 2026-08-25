@@ -8,12 +8,15 @@ const devLinkStyle: CSSProperties = {
   cursor: "pointer", padding: "6px 16px", textAlign: "left", textDecoration: "underline", width: "100%",
 };
 
+function isLocalHost() {
+  const host = window.location.hostname;
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+}
+
 export function DevTools() {
   const b = useBriefing();
 
-  const showDevTools =
-    import.meta.env.DEV || import.meta.env.VITE_SHOW_DEVTOOLS === "true";
-  if (!showDevTools) return null;
+  if (!import.meta.env.DEV || !isLocalHost()) return null;
 
   const fillTestData = () => {
     b.setWelcome(TEST_DATA.welcome);

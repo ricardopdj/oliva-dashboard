@@ -41,7 +41,7 @@ export function Sidebar() {
         }}>
           Reiniciar formulário
         </button>
-        <DevTools />
+        {import.meta.env.DEV && <DevTools />}
       </div>
     </>
   );
